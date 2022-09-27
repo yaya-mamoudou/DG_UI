@@ -4,15 +4,12 @@ import axios from 'axios';
 
 export default function Home() {
 	const [message, setMessage] = useState('')
-	const [age, setAge] = useState()
-
+	const [updateId, setUpdateId] = useState(null)
 	const [todoList, setTodoList] = useState([])
-	const baseURL = "http://localhost:4000"
 
 	useEffect(() => {
 		getTodos()
 	}, [])
-
 
 	const handleChange = (e) => {
 		setMessage(e.target.value)
@@ -34,15 +31,31 @@ export default function Home() {
 		setTodoList(newList)
 	}
 
+	const editTodo = (id, message) => {
+		console.log(id, message);
+		setMessage(message)
+		setUpdateId(id)
+	}
+
+	const submitUpdate = async () => {
+		console.log(message);
+		const todo = await axios.put(`http://localhost:4000/update-todo/${updateId}`, { message })
+		getTodos()
+	}
+
 	return <div className={styles.container}>
-		<input onChange={handleChange} name="todo" type="text" />
-		<button onClick={submit} >Add todo</button>
-		<button onClick={getTodos}>Fetch to list</button>
+
+		<input value={message} onChange={handleChange} name="todo" type="text" />
+
+		{updateId ? <button onClick={submitUpdate} >Update</button> : <button onClick={submit} >Add todo</button>}
+
 		<br />
 		{todoList.map((todo, index) => {
 			return (
-				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
+				<div key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} >
 					<h3>{todo.message}</h3>
+
+					<button onClick={() => editTodo(todo._id, todo.message)}>Edit</button>
 					<button onClick={() => deleteTodo(todo._id)}>delete</button>
 				</div>
 			)
